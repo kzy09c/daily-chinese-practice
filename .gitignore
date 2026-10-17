@@ -2,6 +2,7 @@
 /settings.json
 /state.json
 *.tmp
+/speech-test.wav
 *.lnk
 *.log
 

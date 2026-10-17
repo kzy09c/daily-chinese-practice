@@ -11,6 +11,8 @@ expressions, with simplified Chinese characters, pinyin, and English meanings.
 - 1,000 distinct words and expressions, with an emphasis on challenging vocabulary for discussion, writing, news, and adult conversation.
 - A random word each day, rather than a fixed sequence through the file.
 - A **Skip / Next word** button to draw another word immediately.
+- A **Read aloud** button to pronounce the current Chinese word in Mandarin using a Windows voice.
+- Press **R** to replay pronunciation. Playback stays responsive and stops when the word changes or the app closes.
 - Press **Enter** or the **right arrow** to skip without the mouse.
 - Your current word is saved when you skip and stays the same when you reopen the app that day.
 - Words can repeat on later draws. A draw excludes only the word currently displayed, so skipping always changes the word.
@@ -26,6 +28,7 @@ Here is what it looks like:
 
 - Windows with Windows PowerShell 5.1 and .NET Framework/WPF.
 - A Chinese font such as Microsoft YaHei UI, normally included with Windows.
+- For pronunciation, a Windows Mandarin text-to-speech voice, such as Chinese (Simplified, China). Add one under **Windows Settings > Time & language > Speech > Add voices** if none is installed. The voice download needs an internet connection; normal playback works offline.
 - An extracted app folder that the current user can write to, for saving their current word.
 
 Verified using Windows PowerShell 5.1 on Windows. macOS and Linux are not supported.
@@ -36,6 +39,7 @@ Verified using Windows PowerShell 5.1 on Windows. macOS and Linux are not suppor
 2. Double-click **Open Daily Chinese.cmd**.
 3. Drag the top of the card to move it. The dash minimises it; the cross or Escape closes it.
 4. Click **Skip / Next word**, or press Enter or the right arrow, whenever you want another word.
+5. Click **Read aloud**, or press R, to hear the Chinese word. Clicking again restarts the pronunciation.
 
 Alternatively, run this command from the repository folder:
 
@@ -97,6 +101,7 @@ Run these commands from the repository folder:
 powershell.exe -NoProfile -STA -ExecutionPolicy Bypass -File .\DailyChinese.ps1 -Validate
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\Test-WordEngine.ps1
 powershell.exe -NoProfile -STA -ExecutionPolicy Bypass -File .\DailyChinese.ps1 -PreviewPath "$PWD\preview.png"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\Test-SpeechEngine.ps1 -OutputPath "$PWD\speech-test.wav"
 ```
 
 Validation checks the vocabulary count, missing fields, and duplicate words.
@@ -105,6 +110,7 @@ repeats, changed vocabulary, and recovery from invalid state. Tests use a tempor
 state file; validation and preview do not write the user's state or install startup.
 
 The test script accepts `-ScratchDirectory` if a specific writable test folder is needed.
+The speech test requires an installed Mandarin voice and verifies that Windows can synthesise a WAV file. The app searches both desktop and OneCore Windows voice categories, prefers mainland Mandarin, and does not substitute an English or Japanese voice.
 
 ## Files
 
@@ -112,8 +118,10 @@ The test script accepts `-ScratchDirectory` if a specific writable test folder i
 | --- | --- |
 | `DailyChinese.ps1` | WPF interface, skip button, and daily refresh timer |
 | `WordEngine.ps1` | Random selection and saved current-word state |
+| `SpeechEngine.ps1` | Mandarin voice selection, asynchronous speech, and stopping playback |
 | `words.txt` | Vocabulary, pinyin, and English meanings |
 | `tests/Test-WordEngine.ps1` | Checks random selection and persistence |
+| `tests/Test-SpeechEngine.ps1` | Verifies Mandarin speech synthesis |
 | `Open Daily Chinese.cmd` | Opens the app without requiring a terminal |
 | `Install.ps1` / `Uninstall.ps1` | Add or remove the two shortcuts |
 | `Enable automatic start.cmd` / `Disable automatic start.cmd` | Double-click wrappers for shortcut setup |

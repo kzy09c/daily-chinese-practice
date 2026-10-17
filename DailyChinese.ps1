@@ -6,6 +6,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $appRoot = $PSScriptRoot
 . (Join-Path $appRoot 'WordEngine.ps1')
+. (Join-Path $appRoot 'SpeechEngine.ps1')
 $words = @(Import-Csv -LiteralPath (Join-Path $appRoot 'words.txt') -Delimiter '|' -Encoding UTF8)
 Test-Vocabulary -Words $words
 if ($Validate) {
@@ -38,7 +39,11 @@ Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
       <TextBlock x:Name="CharactersText" Grid.Row="2" Foreground="#173F38" FontFamily="Microsoft YaHei UI" FontSize="56" VerticalAlignment="Center"/>
       <TextBlock x:Name="PinyinText" Grid.Row="3" Foreground="#147C6B" FontSize="24"/>
       <TextBlock x:Name="EnglishText" Grid.Row="4" Foreground="#293B36" FontSize="19" TextWrapping="Wrap" Margin="0,3,0,0"/>
-      <Button x:Name="NextButton" Grid.Row="5" Content="Skip / Next word &#x2192;" Height="36" VerticalAlignment="Center" Background="#147C6B" Foreground="White" BorderThickness="0" FontSize="13" FontWeight="SemiBold" Cursor="Hand" ToolTip="Pick another random word. Skipped words can appear again." IsDefault="True"/>
+      <Grid Grid.Row="5">
+        <Grid.ColumnDefinitions><ColumnDefinition Width="130"/><ColumnDefinition Width="10"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+        <Button x:Name="ReadButton" Content="&#x25B6; Read aloud" Height="36" VerticalAlignment="Center" Background="#E3EEE8" Foreground="#173F38" BorderThickness="0" FontSize="13" FontWeight="SemiBold" Cursor="Hand" ToolTip="Hear the Chinese word in Mandarin (R)"/>
+        <Button x:Name="NextButton" Grid.Column="2" Content="Skip / Next word &#x2192;" Height="36" VerticalAlignment="Center" Background="#147C6B" Foreground="White" BorderThickness="0" FontSize="13" FontWeight="SemiBold" Cursor="Hand" ToolTip="Pick another random word. Skipped words can appear again." IsDefault="True"/>
+      </Grid>
       <TextBlock Grid.Row="6" Text="A random word each day. Skip anytime." Foreground="#7B8176" FontSize="10.5" VerticalAlignment="Bottom"/>
     </Grid>
   </Border>
@@ -54,9 +59,11 @@ $pinyinText = $window.FindName('PinyinText')
 $englishText = $window.FindName('EnglishText')
 $statePath = Join-Path $appRoot 'state.json'
 $script:displayedDate = ''
+$script:mandarinSpeech = $null
 
 function Set-DisplayedWord {
     param([object]$Word, [datetime]$Date)
+    Stop-MandarinSpeech -Speech $script:mandarinSpeech
     $dateText.Text = $Date.ToString('dddd, d MMMM yyyy', [Globalization.CultureInfo]::GetCultureInfo('en-AU'))
     $charactersText.Text = $Word.characters
     $charactersText.FontSize = if ($Word.characters.Length -gt 4) { 46 } else { 56 }
@@ -77,6 +84,19 @@ function Update-DailyWord {
 
 function Show-SaveError {
     [Windows.MessageBox]::Show('Could not save your next word. Check that this app folder is writable, then try again.', 'Daily Chinese', 'OK', 'Warning') | Out-Null
+}
+
+function Read-DisplayedWord {
+    try {
+        if (-not $script:mandarinSpeech) { $script:mandarinSpeech = New-MandarinSpeaker }
+        if (-not $script:mandarinSpeech) {
+            [Windows.MessageBox]::Show('Add a Mandarin voice in Windows Settings > Time & language > Speech > Add voices. Choose Chinese (Simplified, China), then try Read aloud again.', 'Mandarin voice needed', 'OK', 'Information') | Out-Null
+            return
+        }
+        Read-MandarinWord -Speech $script:mandarinSpeech -Text $charactersText.Text
+    } catch {
+        [Windows.MessageBox]::Show('Windows could not play the pronunciation. Check your sound output and installed Mandarin speech voice, then try again.', 'Daily Chinese', 'OK', 'Warning') | Out-Null
+    }
 }
 
 if ($PreviewPath) {
@@ -106,11 +126,13 @@ try {
     })
     $window.FindName('MinimizeButton').Add_Click({ $window.WindowState = 'Minimized' })
     $window.FindName('CloseButton').Add_Click({ $window.Close() })
+    $window.FindName('ReadButton').Add_Click({ Read-DisplayedWord })
     $window.FindName('NextButton').Add_Click({
         try { Update-DailyWord -Skip } catch { Show-SaveError }
     })
     $window.Add_KeyDown({
         if ($_.Key -eq 'Escape') { $window.Close() }
+        elseif ($_.Key -eq 'R') { Read-DisplayedWord; $_.Handled = $true }
         elseif ($_.Key -eq 'Right') {
             try { Update-DailyWord -Skip } catch { Show-SaveError }
             $_.Handled = $true
@@ -125,6 +147,7 @@ try {
     $window.Add_Closed({ $timer.Stop() })
     $window.ShowDialog() | Out-Null
 } finally {
+    Close-MandarinSpeaker -Speech $script:mandarinSpeech
     $mutex.ReleaseMutex()
     $mutex.Dispose()
 }

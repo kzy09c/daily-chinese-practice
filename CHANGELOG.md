@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-17: Mandarin pronunciation
+
+- Added Read aloud and the R keyboard shortcut for offline Mandarin pronunciation.
+- Uses installed Windows desktop or OneCore Mandarin voices, preferring mainland Mandarin.
+- Replaying cancels the old utterance; changing words or closing the card stops playback.
+- Added a Mandarin synthesis test and updated the screenshot and instructions.
+
 ## 2026-10-17: random selection and skipping
 
 - Added a Skip / Next word button, plus Enter and right-arrow shortcuts.
