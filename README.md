@@ -2,8 +2,7 @@
 
 An offline Windows desktop card for learning harder Mandarin vocabulary and
 expressions, with simplified Chinese characters, pinyin, and English meanings.
-
-![Daily Chinese desktop card](assets/preview.png)
+<img src="assets/dancing.gif" alt="Project Demo" width="500">
 
 ## Features
 
@@ -19,6 +18,7 @@ expressions, with simplified Chinese characters, pinyin, and English meanings.
 
 The card is a normal desktop window. It does not modify the wallpaper. Skipping
 is a convenience, not a permanent mark that a word has been learned.
+![Daily Chinese desktop card](assets/preview.png)
 
 ## Requirements
 
