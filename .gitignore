@@ -1,0 +1,12 @@
+# Personal first-run settings and Windows shortcuts
+/settings.json
+/state.json
+*.tmp
+*.lnk
+*.log
+
+# Editor and operating-system files
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
