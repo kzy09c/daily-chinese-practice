@@ -18,8 +18,8 @@ expressions, with simplified Chinese characters, pinyin, and English meanings.
 - Optional automatic launch when the current Windows user signs in.
 - Works offline. No accounts, API keys, Python, Node.js, or downloads at runtime.
 
-The card is a normal desktop window. It does not modify the wallpaper. Skipping
-is a convenience, not a permanent mark that a word has been learned.
+Here is what it looks like:
+
 ![Daily Chinese desktop card](assets/preview.png)
 
 ## Requirements
