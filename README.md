@@ -2,6 +2,8 @@
 
 An offline Windows desktop card for learning harder Mandarin vocabulary and
 expressions, with simplified Chinese characters, pinyin, and English meanings.
+
+
 <img src="assets/dancing.gif" alt="Project Demo" width="500">
 
 ## Features
